@@ -14,6 +14,7 @@ import math
 from models.retinaface import RetinaFace
 from adamp import AdamP
 from adamp import SGDP
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 parser = argparse.ArgumentParser(description='Retinaface Training')
 parser.add_argument('--training_dataset', default='./data/widerface/train/label.txt', help='Training dataset directory')
@@ -128,7 +129,8 @@ def train():
         load_t0 = time.time()
         if iteration in stepvalues:
             step_index += 1
-        lr = adjust_learning_rate(optimizer, gamma, epoch, step_index, iteration, epoch_size)
+        #lr = adjust_learning_rate(optimizer, gamma, epoch, step_index, iteration, epoch_size)
+        lr = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, max_iter)
 
         # load train data
         images, targets = next(batch_iterator)
@@ -144,6 +146,7 @@ def train():
         loss = cfg['loc_weight'] * loss_l + loss_c + loss_landm
         loss.backward()
         optimizer.step()
+        lr.step()
         load_t1 = time.time()
         batch_time = load_t1 - load_t0
         eta = int(batch_time * (max_iter - iteration))
