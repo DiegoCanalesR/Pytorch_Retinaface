@@ -60,8 +60,8 @@ training_dataset = args.training_dataset
 save_folder = args.save_folder
 
 net = RetinaFace(cfg=cfg)
-print("Printing net...")
-print(net)
+#print("Printing net...")
+#print(net)
 
 if args.resume_net is not None:
     print('Loading resume network...')
@@ -93,6 +93,7 @@ elif args.optimizer == 'adamp':
     optimizer = AdamP(net.parameters(), lr=initial_lr, betas=(0.9, 0.999), weight_decay=weight_decay)
 elif args.optimizer == 'sgdp':
     optimizer = SGDP(net.parameters(), lr=initial_lr, weight_decay=weight_decay, momentum=0.9, nesterov=True)
+print(optimizer)
 
 criterion = MultiBoxLoss(num_classes, 0.35, True, 0, True, 7, 0.35, False)
 
@@ -131,7 +132,7 @@ def train():
         if iteration in stepvalues:
             step_index += 1
         #lr = adjust_learning_rate(optimizer, gamma, epoch, step_index, iteration, epoch_size)
-        lr = CosineAnnealingLR(optimizer, max_iter)
+        scheduler = CosineAnnealingLR(optimizer, max_iter)
 
         # load train data
         images, targets = next(batch_iterator)
@@ -147,13 +148,13 @@ def train():
         loss = cfg['loc_weight'] * loss_l + loss_c + loss_landm
         loss.backward()
         optimizer.step()
-        lr.step()
+        scheduler.step()
         load_t1 = time.time()
         batch_time = load_t1 - load_t0
         eta = int(batch_time * (max_iter - iteration))
-        print('Epoch:{}/{} || Epochiter: {}/{} || Iter: {}/{} || Loc: {:.4f} Cla: {:.4f} Landm: {:.4f} || LR: {:.8f} || Batchtime: {:.4f} s || ETA: {}'
+        print('Epoch:{}/{} || Epochiter: {}/{} || Iter: {}/{} || Loc: {:.4f} Cla: {:.4f} Landm: {:.4f} || Batchtime: {:.4f} s || ETA: {}'
               .format(epoch, max_epoch, (iteration % epoch_size) + 1,
-              epoch_size, iteration + 1, max_iter, loss_l.item(), loss_c.item(), loss_landm.item(), lr, batch_time, str(datetime.timedelta(seconds=eta))))
+              epoch_size, iteration + 1, max_iter, loss_l.item(), loss_c.item(), loss_landm.item(), batch_time, str(datetime.timedelta(seconds=eta))))
 
     torch.save(net.state_dict(), save_folder + cfg['name'] + '_Final.pth')
     # torch.save(net.state_dict(), save_folder + 'Final_Retinaface.pth')
