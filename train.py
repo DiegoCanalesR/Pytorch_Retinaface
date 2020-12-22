@@ -12,6 +12,8 @@ import time
 import datetime
 import math
 from models.retinaface import RetinaFace
+from adamp import AdamP
+from adamp import SGDP
 
 parser = argparse.ArgumentParser(description='Retinaface Training')
 parser.add_argument('--training_dataset', default='./data/widerface/train/label.txt', help='Training dataset directory')
@@ -36,7 +38,7 @@ elif args.network == "resnet50":
     cfg = cfg_re50
 elif args.network == "selecsls60":
     cfg = cfg_sel60
-elif args.network == "efficientnet_b0":
+elif args.network == "efficientnetb0":
     cfg = cfg_effb0
 
 rgb_mean = (104, 117, 123) # bgr order
@@ -81,8 +83,15 @@ else:
 
 cudnn.benchmark = True
 
+if args.optimizer == 'sgd':
+    optimizer = optim.SGD(net.parameters(), lr=initial_lr, momentum=momentum, weight_decay=weight_decay)
+elif args.optimizer == 'adam':
+    optimizer = optim.Adam(net.parameters(), lr=initial_lr, momentum=momentum, weight_decay=weight_decay)
+elif args.optimizer == 'adamp':
+    optimizer = AdamP(net.parameters(), lr=initial_lr, betas=(0.9, 0.999), weight_decay=weight_decay)
+elif args.optimizer == 'sgdp':
+    optimizer = SGDP(net.parameters(), lr=initial_lr, weight_decay=weight_decay, momentum=0.9, nesterov=True)
 
-optimizer = optim.SGD(net.parameters(), lr=initial_lr, momentum=momentum, weight_decay=weight_decay)
 criterion = MultiBoxLoss(num_classes, 0.35, True, 0, True, 7, 0.35, False)
 
 priorbox = PriorBox(cfg, image_size=(img_dim, img_dim))
