@@ -130,7 +130,7 @@ def train():
         if iteration in stepvalues:
             step_index += 1
         #lr = adjust_learning_rate(optimizer, gamma, epoch, step_index, iteration, epoch_size)
-        lr = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, max_iter)
+        lr = CosineAnnealingLR(optimizer, max_iter)
 
         # load train data
         images, targets = next(batch_iterator)
