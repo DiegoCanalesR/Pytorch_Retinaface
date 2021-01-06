@@ -119,10 +119,7 @@ class RetinaFace(nn.Module):
         return landmarkhead
 
     def forward(self,inputs):
-        if cfg['name'] == 'selecsls60' or cfg['name'] == 'efficientnetb0':
-            out = self.body(inputs)[-3:]
-        else:
-            out = self.body(inputs)
+        out = self.body(inputs)[-3:]
 
         # FPN
         fpn = self.fpn(out)
