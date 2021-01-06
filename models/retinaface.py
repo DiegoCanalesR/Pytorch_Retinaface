@@ -72,12 +72,11 @@ class RetinaFace(nn.Module):
             self.body = _utils.IntermediateLayerGetter(backbone, cfg['return_layers'])
         elif cfg['name'] == 'selecsls60':
             import timm
-            backbone = timm.create_model('selecsls60', features_only=True, pretrained=True)
-            self.body = backbone[-3:]
+            self.body = timm.create_model('selecsls60', features_only=True, pretrained=True)
+            
         elif cfg['name'] == 'efficientnetb0':
             import timm
-            backbone = timm.create_model('efficientnet_b0', features_only=True, pretrained=True)
-            self.body = backbone[-3:]
+            self.body = timm.create_model('efficientnet_b0', features_only=True, pretrained=True)
 
         in_channels_stage2 = cfg['in_channel']
         if cfg['name'] == 'Resnet50' or cfg['name'] == 'mobilenet0.25':
@@ -120,7 +119,10 @@ class RetinaFace(nn.Module):
         return landmarkhead
 
     def forward(self,inputs):
-        out = self.body(inputs)
+        if cfg['name'] == 'selecsls60' or cfg['name'] == 'efficientnetb0':
+            out = self.body(inputs)[-3:]
+        else:
+            out = self.body(inputs)
 
         # FPN
         fpn = self.fpn(out)
