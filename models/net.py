@@ -82,9 +82,9 @@ class FPN(nn.Module):
         # names = list(input.keys())
         #input = list(input.values())
 
-        output1 = self.output1(input[2])
-        output2 = self.output2(input[3])
-        output3 = self.output3(input[4])
+        output1 = self.output1(input[0])
+        output2 = self.output2(input[1])
+        output3 = self.output3(input[2])
 
         up3 = F.interpolate(output3, size=[output2.size(2), output2.size(3)], mode="nearest")
         output2 = output2 + up3
