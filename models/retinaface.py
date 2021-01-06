@@ -73,11 +73,11 @@ class RetinaFace(nn.Module):
         elif cfg['name'] == 'selecsls60':
             import timm
             backbone = timm.create_model('selecsls60', features_only=True, pretrained=True)
-            self.body = backbone
+            self.body = backbone[-3:]
         elif cfg['name'] == 'efficientnetb0':
             import timm
             backbone = timm.create_model('efficientnet_b0', features_only=True, pretrained=True)
-            self.body = backbone
+            self.body = backbone[-3:]
 
         in_channels_stage2 = cfg['in_channel']
         if cfg['name'] == 'Resnet50' or cfg['name'] == 'mobilenet0.25':
